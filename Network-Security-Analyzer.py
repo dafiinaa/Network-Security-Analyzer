@@ -111,5 +111,48 @@ def notification_window(packet_info):
     allow_button.grid(row=0, column=1, padx=5)
 
 
+def start_sniffing():
+    stop_sniffing_event.clear()
+    sniff(prn=analyze_packet, stop_filter=lambda p: stop_sniffing_event.is_set(), store=0)
+
+def stop_sniffing():
+    stop_sniffing_event.set()
+
+def run_sniffing():
+    sniff_thread = threading.Thread(target=start_sniffing)
+    sniff_thread.daemon = True
+    sniff_thread.start()
+
+def update_graph():
+    ips = list(traffic_volume.keys())
+    volumes = list(traffic_volume.values())
+    plt.bar(ips, volumes)
+    plt.xlabel('IP Address')
+    plt.ylabel('Traffic Volume')
+    plt.title('Traffic Volume per IP Address')
+    plt.xticks(rotation=45)
+    plt.tight_layout()
+    plt.show()
+
+root = tk.Tk()
+root.title("Network Security Analyzer")
+
+tree = ttk.Treeview(root, columns=('Source IP', 'Destination IP', 'Protocol'), show='headings')
+tree.heading('Source IP', text='Source IP')
+tree.heading('Destination IP', text='Destination IP')
+tree.heading('Protocol', text='Protocol')
+
+tree.pack(fill=tk.BOTH, expand=True)
+
+start_button = tk.Button(root, text="Start Sniffing", command=run_sniffing)
+start_button.pack(pady=5)
+
+stop_button = tk.Button(root, text="Stop Sniffing", command=stop_sniffing)
+stop_button.pack(pady=5)
+
+root.mainloop()
+
+
+
 
 
