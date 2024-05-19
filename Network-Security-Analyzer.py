@@ -29,10 +29,11 @@ def analyze_packet(packet):
         update_traffic_volume(src_ip)
         update_traffic_volume(dst_ip)
 
-        insert_packet(packet_info)
-
         if is_suspicious(packet_info):
             notify_user(packet_info)
+        else:
+            insert_packet(packet_info)
+
 
         update_graph()
 
@@ -77,18 +78,16 @@ def show_next_notification():
 
 def notification_window(packet_info):
     def deny_packet():
-        denied_source_ip = packet_info['Source IP']
-        denied_destination_ip = packet_info['Destination IP']
-        print(f"Denied access from {denied_source_ip} to {denied_destination_ip}")
-        blocked_ips.add(denied_source_ip)
-        blocked_ips.add(denied_destination_ip)
-        print("Packet denied")
+        print(f"Denied access from {packet_info['Source IP']} to {packet_info['Destination IP']}")
+        blocked_ips.add(packet_info['Source IP'])
+        blocked_ips.add(packet_info['Destination IP'])
         window.destroy()
         delattr(root, 'notification_window')
         show_next_notification()
 
     def allow_packet():
         print("Packet allowed")
+        insert_packet(packet_info)
         window.destroy()
         delattr(root, 'notification_window')
         show_next_notification()
